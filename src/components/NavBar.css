@@ -1,0 +1,29 @@
+
+.navbar {
+    background-color: #ffe14b; 
+    padding: 10px;
+    color: #3d3838;
+  }
+  
+  .navbar a {
+    color: #3d3838;
+    text-decoration: none;
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .Categories {
+    display: flex;
+  }
+  
+  .Option {
+    margin-right: 10px;
+  }
+  
+  .ActiveOption {
+    color: #ffcc00; 
+  }
+  
+ 
+  
