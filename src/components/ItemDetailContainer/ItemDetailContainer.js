@@ -1,29 +1,44 @@
-import './ItemDetailContainer.css'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductById } from '../../asyncMock'
-import ItemDetail from '../ItemDetail/ItemDetail'
-
+import { db } from '../../Config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import ItemDetail from '../ItemDetail/ItemDetail';
+import './ItemDetailContainer.css';
 
 const ItemDetailContainer = () => {
-    const [product, setProduct] = useState(null)
-
-    const { itemId} = useParams()
+    const [product, setProduct] = useState(null);
+    const { itemId } = useParams();
 
     useEffect(() => {
-        getProductById(itemId)
-            .then(response => {
-            setProduct(response);
-            })
-            .catch(error => {
-            console.error(error);
-            });
-        }, [itemId]);
-    return(
-        <div className='ItemDetailContainer' >
-            <ItemDetail {...product} />
-        </div>
-    )
-}
+        const fetchProduct = async () => {
+            try {
+                if (!itemId) {
+                    console.error('itemId no está definido');
+                    return;
+                }
 
-export default ItemDetailContainer
+                const productRef = doc(db, 'products', itemId);
+                const productSnapshot = await getDoc(productRef);
+
+                if (productSnapshot.exists()) {
+                    const productData = { id: productSnapshot.id, ...productSnapshot.data() };
+                    setProduct(productData);
+                } else {
+                    console.error('El producto ya no existe');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchProduct();
+    }, [itemId]);
+
+    return (
+        <div className='ItemDetailContainer'>
+            {product ? <ItemDetail {...product} /> : <p>Ya te lo traigo...</p>}
+        </div>
+    );
+};
+
+export default ItemDetailContainer;

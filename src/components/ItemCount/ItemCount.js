@@ -1,28 +1,33 @@
-import './ItemCount.css'
-import { useState, useEffect } from 'react';
-import { getProducts } from '../../asyncMock';
+import React, { useState, useEffect } from 'react';
+import { db } from '../../Config/firebase';
+import { collection, getDocs, query } from 'firebase/firestore';
+import './ItemCount.css';
 
 const ItemCount = ({ initial, onAdd }) => {
   const [quantity, setQuantity] = useState(initial);
-  const [stock, setStock] = useState(0); 
+  const [stock, setStock] = useState(0);
 
   useEffect(() => {
-    
-    getProducts().then((products) => {
-      const totalStock = products.reduce((acc, product) => acc + product.stock, 0);
-      setStock(totalStock);
-    });
-  }, []); 
+    const fetchStock = async () => {
+      try {
+        const productsCollection = collection(db, 'products');
+        const productsSnapshot = await getDocs(productsCollection);
+        const totalStock = Array.from(productsSnapshot.docs)
+          .map(doc => doc.data().stock)
+          .reduce((acc, currentStock) => acc + currentStock, 0);
+
+        setStock(totalStock);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchStock();
+  }, []);
 
   const increment = () => {
-    console.log('Current Quantity:', quantity);
-    console.log('Current Stock:', stock);
-  
     if (quantity < stock) {
-      setQuantity((prevQuantity) => {
-        console.log('Incrementing:', prevQuantity + 1);
-        return prevQuantity + 1;
-      });
+      setQuantity(prevQuantity => prevQuantity + 1);
     }
   };
 
